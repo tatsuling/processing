@@ -3,6 +3,21 @@
 from __future__ import division
 
 class Scalable(object):
+    """Return an object that can scale its output with SI prefixes.
+
+    >>> Scalable(1, 'B/s')
+    1.00 B/s
+
+    >>> Scalable(2000, 'B/s')
+    2.00 kB/s
+
+    >>> Scalable(0.1, 'g')
+    100.00 mg
+
+    >>> Scalable(4e15, 'bps')
+    4000.00 Tbps
+    
+    """
     def __init__(self, val, suffix, base=10):
         prefixes = { 
             2: { 0: '', 10: 'ki', 20: 'Mi', 30: 'Gi', 40: 'Ti' },
@@ -13,12 +28,20 @@ class Scalable(object):
         self.base = base
         self.prefixes = prefixes[base]
 
+    def __repr__(self):
+        return str(self)
+
     def __str__(self):
-        vals = [ ( self.val / pow(self.base, exponent), prefix) 
-                    for (exponent, prefix) in self.prefixes.iteritems()
-                    if pow(self.base,exponent) <= self.val and self.val < pow(self.base,exponent+3)]
-        if len(vals) > 0:
-            return '%0.2f %s%s' % ( vals[0][0], vals[0][1], self.suffix )
-        else:
+        vals = [ ( self.val / pow(self.base, exponent), exponent, prefix ) 
+                    for (exponent, prefix) in self.prefixes.iteritems() 
+                    if pow(self.base, exponent) <= self.val ]
+        val = max( vals, key=lambda v: v[1] )
+        try:
+            return '%0.2f %s%s' % ( val[0], val[2], self.suffix )
+        except:
             return '%0.2f %s' % ( self.val, self.suffix )
+
+if __name__ == "__main__":
+    import doctest
+    doctest.testmod()
 

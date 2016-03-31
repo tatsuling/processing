@@ -4,7 +4,8 @@ from __future__ import division
 from __future__ import print_function
 
 import sys, os, time
-import Percentage, Scalable, ProgressUpdater
+from Scalable import Scalable
+from ProgressUpdater import Percentage, Updater
 #from itertools 
 
 def main():
@@ -20,10 +21,10 @@ def main():
     for fn in sys.argv[1:]:
         with open(fn, 'rb') as f:
             begin_time = time.time()
-            updater = ProgressUpdater.Updater( 
+            updater = Updater( 
                 lambda: '{0} -- {1}'.format(
-                    Percentage.Percentage( 100 * f.tell() / os.fstat(f.fileno()).st_size ),
-                    Scalable.Scalable( f.tell() / (time.time() - begin_time), 'B/s' )
+                    Percentage( 100 * f.tell() / os.fstat(f.fileno()).st_size ),
+                    Scalable( f.tell() / (time.time() - begin_time), 'B/s' )
                 ),
                 0.5 )
             tags = {}
