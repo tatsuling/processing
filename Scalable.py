@@ -35,9 +35,9 @@ class Scalable(object):
         vals = [ ( self.val / pow(self.base, exponent), exponent, prefix ) 
                     for (exponent, prefix) in self.prefixes.iteritems() 
                     if pow(self.base, exponent) <= self.val ]
-        val = max( vals, key=lambda v: v[1] )
+        value, exponent, prefix = max( vals, key=lambda v: v[1] )
         try:
-            return '%0.2f %s%s' % ( val[0], val[2], self.suffix )
+            return '%0.2f %s%s' % ( value, prefix, self.suffix )
         except:
             return '%0.2f %s' % ( self.val, self.suffix )
 
