@@ -8,7 +8,7 @@ import getopt, sys
 import time, os, math
 
 from Scalable import Scalable
-from ProgressUpdater import Percentage, ProgressUpdater
+from ProgressUpdater import Percentage, Updater
 
 l2_re = re.compile('^L2_0:')
 #option_re = re.compile('(?P<name>[a-zA-Z\-]+)\[(?P<value>[^\]]*)\]')
