@@ -55,8 +55,8 @@ class Updater(object):
                 output_str = self.disp()
             except:
                 output_str = self.disp
-            sys.stdout.write( '\r' + output_str )
-            sys.stdout.flush()
+            sys.stderr.write( '\r' + output_str )
+            sys.stderr.flush()
             self.update_time = now
 
     def final(self):
@@ -65,8 +65,8 @@ class Updater(object):
             output_str = self.disp()
         except:
             output_str = self.disp
-        sys.stdout.write( '\r' + output_str + '\n' )
-        sys.stdout.flush()
+        sys.stderr.write( '\r' + output_str + '\n' )
+        sys.stderr.flush()
         self.update_time = now
         
 
