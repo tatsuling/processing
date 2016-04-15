@@ -9,7 +9,15 @@ from ProgressUpdater import Percentage, Updater
 import tarfile
 from itertools import izip_longest
 from multiprocessing import Pool,Process,Manager
+import units
 #from itertools 
+
+try:
+    import numpy as np
+    from scipy.fftpack import fft
+except:
+    print('Could not import NumPy or SciPy')
+    sys.exit()
 
 def file_size(f):
     try:
@@ -27,8 +35,8 @@ def process_file(fn, f=None):
             fn
         ),
         0.5 )
-    accesses = []
     cycles = []
+    rips = {}
     for line in f:
         fields = line.split()
         core = int( fields[0] )
@@ -44,10 +52,106 @@ def process_file(fn, f=None):
         # access = {'rip': rip, 'tag': tag, 'cycle': cycle, 'core': core}
         # accesses.append( access )
         cycles.append( cycle )
+        try:
+            rips[rip].append( cycle )
+        except:
+            rips[rip] = [ cycle ]
 
         updater.update()
     updater.final()
 
+    if True:
+        bin_size = 1024
+        fft_input = np.zeros( (max(cycles) + 1 + bin_size - 1) // bin_size )
+
+        dt = bin_size/units.hertz(2.4e9)
+        M  = len(fft_input)
+        T  = M * dt
+        S  = M / 2
+        Sw = (1/dt) / 2
+        ds = Sw / S
+
+        print( '# rip={0}'.format(hex(rip)) )
+        print( '# dt={0}'.format(dt) )
+        print( '# M ={0}'.format(M ) )
+        print( '# T ={0}'.format(T ) )
+        print( '# S ={0}'.format(S ) )
+        print( '# Sw={0}'.format(Sw) )
+        print( '# ds={0}'.format(ds) )
+        print( 'n={0}'.format(len(cycles)) )
+
+        for cycle in cycles:
+            fft_input[cycle/bin_size] += 1
+        print( 'Doing FFT' );
+        fft_output = fft( fft_input )
+        with open('{0}.fft.csv'.format(fn), 'wb') as of:
+            begin_time = time.time()
+            x_pos = 0
+            updater = Updater( 
+                lambda: '{0} -- {1}'.format(
+                    Percentage( 100 * x_pos / len(fft_output) ),
+                    Scalable( x / (time.time() - begin_time), 'lines/s' )
+                ),
+                0.5 )
+
+            for x,freq in enumerate(fft_output):
+                print( '{0}, {1}, {2}'.format( ds.Value*x, np.real(freq), np.imag(freq)), file=of )
+                x_pos = x
+                updater.update()
+            updater.final()
+
+#    for rip,cycles in rips.iteritems():
+#        bin_size = 256
+#        fft_input = np.zeros( (max(cycles) + 1 + bin_size - 1) // bin_size, dtype=np.int8 )
+#
+#        dt = bin_size/units.hertz(2.4e9)
+#        M  = len(fft_input)
+#        T  = M * dt
+#        S  = M / 2
+#        Sw = (1/dt) / 2
+#        ds = Sw / S
+#
+#        print( '# rip={0}'.format(hex(rip)) )
+#        print( '# dt={0}'.format(dt) )
+#        print( '# M ={0}'.format(M ) )
+#        print( '# T ={0}'.format(T ) )
+#        print( '# S ={0}'.format(S ) )
+#        print( '# Sw={0}'.format(Sw) )
+#        print( '# ds={0}'.format(ds) )
+#        print( 'n={0}'.format(len(cycles)) )
+#        if len(cycles) < 10: continue
+#
+#        for cycle in cycles:
+#            fft_input[cycle/bin_size] += 1
+#        print( 'Doing FFT' );
+#        fft_output = fft( fft_input )
+#
+#        print( 'Doing File Output' );
+#        with open('{0}.{1}.fft.csv'.format(fn, hex(rip)), 'wb') as of:
+#            print( '# rip={0}'.format(hex(rip)), file=of )
+#            print( '# dt={0}'.format(dt), file=of )
+#            print( '# M ={0}'.format(M ), file=of )
+#            print( '# T ={0}'.format(T ), file=of )
+#            print( '# S ={0}'.format(S ), file=of )
+#            print( '# Sw={0}'.format(Sw), file=of )
+#            print( '# ds={0}'.format(ds), file=of )
+#            for cycle in cycles:
+#                print( '# {0}'.format(cycle), file=of )
+#
+#            begin_time = time.time()
+#            x_pos = 0
+#            updater = Updater( 
+#                lambda: '{0} -- {1}'.format(
+#                    Percentage( 100 * x_pos / len(fft_output) ),
+#                    Scalable( x / (time.time() - begin_time), 'lines/s' )
+#                ),
+#                0.5 )
+#
+#            for x,freq in enumerate(fft_output):
+#                print( '{0}, {1}, {2}'.format( ds.Value*x, np.real(freq), np.imag(freq)), file=of )
+#                x_pos = x
+#                updater.update()
+#            updater.final()
 #     with open(fn+'.time.csv', 'wb') as of:
 #         cycles = [ access['cycle'] for access in accesses ]
 #         last_cycle = 0
