@@ -10,9 +10,9 @@ for x in *.log; do
         files="${x}.backup ${x}"
     fi
     of=`readlink -f "combined/${x}"`
-    pushd ${d}
+    pushd ${d} > /dev/null
     ./gather.py --output="${of}" ${files}
-    popd
+    popd > /dev/null
 done
 
 echo "Compressing..."
