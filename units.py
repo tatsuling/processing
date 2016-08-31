@@ -350,12 +350,26 @@ class Unit(object):
         # if _debug >= 7:
         #     print 'div : self=%s other=%s' % (self, other)
         try:
-            return Unit(self.Value / other.Value, simplify(combineUnits(self.Units, inverse(other.Units))))
+            return Unit(self.Value.__div__(other.Value), simplify(combineUnits(self.Units, inverse(other.Units))))
+
+        except:
+            return Unit(self.Value / other, self.Units)
+
+    def __truediv__(self, other):
+        # if _debug >= 7:
+        #     print 'div : self=%s other=%s' % (self, other)
+        try:
+            return Unit(self.Value.__truediv__(other.Value), simplify(combineUnits(self.Units, inverse(other.Units))))
 
         except:
             return Unit(self.Value / other, self.Units)
 
     def __rdiv__(self, other):
+        #        if _debug >= 7:
+        #            print 'rdiv: self=%s other=%s' % (self, other)
+        return Unit(other / self.Value, simplify(inverse(self.Units)))
+
+    def __rtruediv__(self, other):
         #        if _debug >= 7:
         #            print 'rdiv: self=%s other=%s' % (self, other)
         return Unit(other / self.Value, simplify(inverse(self.Units)))
