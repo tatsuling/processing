@@ -378,6 +378,9 @@ class Unit(object):
         #            print 'rdiv: self=%s other=%s' % (self, other)
         return Unit(other / self.Value, simplify(inverse(self.Units)))
 
+    def __pow__(self, other):
+        return Unit(self.Value ** other, simplify(combineUnits(self.Units, self.Units)))
+
     @classmethod
     def complex_base_units(cls):
         try:
