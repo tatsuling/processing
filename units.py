@@ -211,10 +211,15 @@ class Unit(object):
         return Counter(self._units)
 
     def __repr__(self):
+        def format_unit_class(u):
+            if u.__module__ == '__main__':
+                return u.__name__
+            return '{0}.{1}'.format(u.__module__, u.__name__)
+
         simple_units = simplify(self.Units)
-        names = [(u.__name__, c) for u,c in sorted(simple_units.iteritems(), key=lambda (u, c): -c) ]
-        unit_names = dict(names)
-        return 'units.Unit({0}, {1!r})'.format(self.Value, unit_names)
+        names = [(format_unit_class(u), c) for u,c in sorted(simple_units.iteritems(), key=lambda (u, c): -c) ]
+        unit_names = ', '.join( '{0}: {1!r}'.format(name, c) for name,c in names )
+        return 'units.Unit({0}, {{ {1} }})'.format(self.Value, unit_names)
         # return self.__str__()
 
     def __str__(self):
