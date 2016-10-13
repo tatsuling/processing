@@ -1,0 +1,3 @@
+[submodule "utility"]
+	path = utility
+	url = git@gitlab.com:tatsuling/utility.git
