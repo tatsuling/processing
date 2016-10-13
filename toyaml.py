@@ -10,9 +10,9 @@ import math
 from copy import deepcopy
 from pprint import pformat
 
-from units import watt, joule, second, hertz, volt, second
+from utility.units import watt, joule, second, hertz, volt, second
 from sim_units import *
-import units
+import utility.units as units
 import argparse
 
 
@@ -91,7 +91,7 @@ def main():
     memory_configs = []
     energy_configs = {}
 
-    print('import units')
+    print('import utility.units')
     print('import sim_units')
     # print('cache_configuration = {')
 
