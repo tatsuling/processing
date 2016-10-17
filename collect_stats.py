@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
+from __future__ import division
 
 import sys
 import os
+import time
 #import yaml
 
+from utility.ProgressUpdater import Updater, Percentage
 
 def err(*objs):
     print( *objs, file=sys.stderr )
@@ -59,13 +62,50 @@ class PathFilter(Filters):
 
 print('#name  active.mean active.samples  drowsy.mean drowsy.samples  powerdown.mean powerdown.samples  user.cycles  L2.read.hit L2.write.hit L2.read.miss L2.write.miss  total.cycles')
 #histogram = open('histogram.csv', 'ab')
+
+
+def file_size(f):
+    try:
+        return f.size
+    except:
+        return os.fstat(f.fileno()).st_size
+
+import threading
+
+def updater(finished, file, f_size):
+    i = 0
+    # f_size = file_size(file)
+    updater = Updater(lambda: '  Loading [{0}] ({1}) {2}'.format(
+            file.name,
+            f_size,
+            Percentage(file.tell()/f_size*100 if f_size > 0 else '???' )
+        ), 
+        0.0)
+
+    while not finished.is_set():
+        finished.wait(0.1)
+        i += 1
+        updater.update()
+        if i > 100000: return 0
+    updater.final()
+
 for fn in sys.argv[1:]:
-    err("  Loading [%s]" % (fn,))
+    f_size = os.path.getsize(fn)
+    # err("  Loading [%s] (%d)" % (fn,f_size))
     with open(fn) as file:
+
+        finished = threading.Event()
+        update_thread = threading.Thread(target=updater, args=(finished, file, file_size(file)))
+        update_thread.daemon = True
+        update_thread.start()
+        
         loader = Loader(file)
         stats = []
         while loader.check_data():
             stats.append( loader.get_data() )
+
+        finished.set()
+        update_thread.join()
 
         #filters = [ TagFilter('total') ]
         #for filter in filters:
