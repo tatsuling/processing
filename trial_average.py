@@ -9,9 +9,11 @@ import code
 from pprint import PrettyPrinter
 import itertools
 
-import units
+# from utility.linq import sequences
+from utility.units import joule, hertz, Unit
+import sim_inits
 
-import cacti
+import energy_usage
 
 pp = PrettyPrinter(indent=4)
 critical_z = {
@@ -27,14 +29,9 @@ critical_z = {
 }
 #critical_z = {3: 1.15, 4: 1.48 }
 
-def natural_numbers():
-	n = 0
-	while True:
-		yield n
-		n += 1
 
 def sqrt(v):
-	if isinstance(v, units.Unit):
+	if isinstance(v, Unit):
 		return math.sqrt(v.Value)
 	else:
 		return math.sqrt(v)
@@ -84,7 +81,7 @@ def output_csv_table( out_file, data_table, keycolumns, sorter=None, columns=Non
 		#for name, values in record.iteritems():
 		for column_name in columns:
 			values = record[ column_name ]
-			stripped_values = [ x.Value if isinstance(x, units.Unit) else x for x in values ]
+			stripped_values = [ x.Value if isinstance(x, Unit) else x for x in values ]
 			stat_record.append( len(stripped_values) )
 			stat_record.append( mean(stripped_values) )
 			stat_record.append( se_mean(stripped_values) )
@@ -145,22 +142,22 @@ def average_last( k ):
 
 ########################################################
 # Frequency
-f = units.hertz(2.4e9)
+f = hertz(2.4e9)
 
-cache = cacti.cache_configuration['32M']
+cache = energy_config.cache_configuration['32M']
 
 def e_read(r): return cache['dynamic']['r'] * r
 def e_write(w): return cache['dynamic']['w'] * w
 
 def seconds(cycles): return cycles / f
 
-def e_active_leakage(cycles): return cache['leakage']['on'] * seconds(cycles)
-def e_drowsy_leakage(cycles): return cache['leakage']['drowsy'] * seconds(cycles)
-def e_off_leakage(cycles)   : return cache['leakage']['off'] * seconds(cycles)
+def e_active_leakage(cycles): return cache['leakage_on'] * seconds(cycles)
+def e_drowsy_leakage(cycles): return cache['leakage_drowsy'] * seconds(cycles)
+def e_off_leakage(cycles)   : return cache['leakage_off'] * seconds(cycles)
 
 def e_active_energy(r, w)   : return e_read(r) + e_write(w)
-def e_drowsy_energy(n)      : return cache['transition']['drowsy'] * cache['subarray'] / cache['lines'] * cacti.line(n)
-def e_off_energy(n)         : return cache['transition']['off'] * cacti.line(n)
+def e_drowsy_energy(n)      : return cache['transition_drowsy_on'] * sim_units.line(n)
+def e_off_energy(n)         : return joule(2.045e-9) + cache['transition_gated_on'] * sim_units.line(n)
 
 def active_cycles(tc, am, asamp, dm, dsamp, om, osamp):
 	return am * asamp / cache['lines'].Value	# Number of cycles the entire cache is on.
@@ -571,7 +568,7 @@ for fn in sys.argv[1:]:
 			benchmark = id[0]
 			machine = tuple(id[2].split('_'))
 
-			for idx, val in zip( natural_numbers(), record[1:] ):
+			for val, idx in enumerate(record[1:]):
 				fields = data[(benchmark, machine)]
 				try:
 					fields[idx].append( val )
