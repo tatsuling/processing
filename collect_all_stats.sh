@@ -5,7 +5,8 @@
 # items="standard_32M drowsy_32M gated_32M bayesian_32M"
 
 predictions="s d g b"
-sizes="2M 4M 8M 16M 32M"
+# sizes="2M 4M 8M 16M 32M"
+sizes="32M"
 technologies="32nm"
 
 dir=`dirname $0`
@@ -16,7 +17,7 @@ for p in ${predictions}; do
             x="${p}_l2_${s}_${t}_normal"
             echo "Collecting $x stats."
             
-            echo "${dir}/collect_stats.py *${x}*.yaml | column -t > ${x}.raw.csv"
+            # echo "${dir}/collect_stats.py *${x}*.yaml | column -t > ${x}.raw.csv"
             if ! ${dir}/collect_stats.py *${x}*.yaml | column -t > ${x}.raw.csv; then
                 exit 1
             fi
