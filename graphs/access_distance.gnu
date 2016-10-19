@@ -1,3 +1,5 @@
+#set terminal wxt size 1024,768 persist raise
+
 #clear
 #reset
 

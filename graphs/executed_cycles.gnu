@@ -1,3 +1,4 @@
+#
 set terminal wxt size 1024,768 persist raise
 
 load 'include/histogram.gnu'

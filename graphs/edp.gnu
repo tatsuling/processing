@@ -1,3 +1,7 @@
+#
+
+set terminal x11 size 640,480 persist raise
+
 load 'include/histogram.gnu'
 load 'include/palette.paired.gnu'
 
@@ -11,18 +15,18 @@ set key samplen 2
 set xtics rotate by -45
 set mytics 2
 set ytics in
-set ytics 0.01
+# set ytics 0.01
 
 set tmargin 0
 
-set terminal epslatex size 3.30,1.5 color colortext
-set output 'edp.tex'
+# set terminal epslatex size 3.30,1.5 color colortext
+# set output 'edp.tex'
 
 plot 'data/edp.csv' \
 	    using (column("s_edp_mean")):(1.96*column("s_edp_se")):xtic(1) title "on-only" ls 2,	\
 	''  using (column("d_edp_mean")):(1.96*column("d_edp_se")):xtic(1) title "lp-only" ls 6,	\
 	''  using (column("g_edp_mean")):(1.96*column("g_edp_se")):xtic(1) title "gated-only" ls 4,	\
-	''  using (column("b_p_edp_mean")):(1.96*column("b_p_edp_se")):xtic(1) title "combined" ls 8
+	''  using (column("b_edp_mean")):(1.96*column("b_edp_se")):xtic(1) title "combined" ls 8
 
 #set terminal epslatex size 3.30,2.50 color colortext
 #set output 'edp_normalized.tex'
